@@ -34,9 +34,9 @@ function WalletGate() {
       </div>
       <div className="animate-fade-up relative flex flex-col items-center px-4 text-center">
         <div className="relative mb-6 flex h-16 w-16 items-center justify-center sm:h-20 sm:w-20">
-          <div className="absolute inset-0 animate-glow rounded-[2px] bg-gradient-to-br from-purple-500 to-pink-500 opacity-40 blur-xl" />
+          <div className="absolute inset-0 animate-glow rounded-[2px] bg-linear-to-br from-purple-500 to-pink-500 opacity-40 blur-xl" />
           <div className="relative flex h-16 w-16 items-center justify-center rounded-[2px] border border-purple-500/30 bg-zinc-950/80 sm:h-20 sm:w-20">
-            <span className="bg-gradient-to-br from-purple-300 to-pink-300 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">T</span>
+            <span className="bg-linear-to-br from-purple-300 to-pink-300 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">T</span>
           </div>
         </div>
         <h1 className="mb-2 text-xl font-bold tracking-tight text-zinc-200 sm:text-2xl">Wallet Required</h1>
@@ -99,15 +99,15 @@ export default function BoardPage() {
               <ArrowLeft className="h-3 w-3" />
               <span className="hidden sm:inline">Back</span>
             </Link>
-            <div className="h-4 w-px bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
+            <div className="h-4 w-px bg-linear-to-b from-transparent via-zinc-700 to-transparent" />
             <div className="relative flex h-6 w-6 items-center justify-center sm:h-7 sm:w-7">
-              <div className="absolute inset-0 rounded-[2px] bg-gradient-to-br from-purple-500 to-pink-500 opacity-30 blur-sm" />
+              <div className="absolute inset-0 rounded-[2px] bg-linear-to-br from-purple-500 to-pink-500 opacity-30 blur-sm" />
               <div className="relative flex h-6 w-6 items-center justify-center rounded-[2px] border border-purple-500/30 bg-zinc-950/80 sm:h-7 sm:w-7">
-                <span className="bg-gradient-to-br from-purple-300 to-pink-300 bg-clip-text text-[10px] font-bold text-transparent sm:text-[11px]">T</span>
+                <span className="bg-linear-to-br from-purple-300 to-pink-300 bg-clip-text text-[10px] font-bold text-transparent sm:text-[11px]">T</span>
               </div>
             </div>
-            <div className="h-4 w-px bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
-            <span className="bg-gradient-to-r from-zinc-300 to-zinc-500 bg-clip-text text-[10px] font-semibold uppercase tracking-[0.2em] text-transparent sm:text-xs">
+            <div className="h-4 w-px bg-linear-to-b from-transparent via-zinc-700 to-transparent" />
+            <span className="bg-linear-to-r from-zinc-300 to-zinc-500 bg-clip-text text-[10px] font-semibold uppercase tracking-[0.2em] text-transparent sm:text-xs">
               Board
             </span>
           </div>

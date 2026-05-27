@@ -45,9 +45,9 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-5">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center border border-purple-500/30 bg-zinc-950">
-              <span className="bg-gradient-to-br from-purple-300 to-pink-300 bg-clip-text text-[11px] font-bold text-transparent">T</span>
+              <span className="bg-linear-to-br from-purple-300 to-pink-300 bg-clip-text text-[11px] font-bold text-transparent">T</span>
             </div>
-            <span className="hidden bg-gradient-to-r from-zinc-300 to-zinc-500 bg-clip-text text-xs font-semibold uppercase tracking-[0.2em] text-transparent sm:inline">
+            <span className="hidden bg-linear-to-r from-zinc-300 to-zinc-500 bg-clip-text text-xs font-semibold uppercase tracking-[0.2em] text-transparent sm:inline">
               Todo Kanban
             </span>
           </Link>
@@ -71,12 +71,12 @@ export default function LandingPage() {
           </div>
 
           <h1 className="animate-fade-up max-w-3xl text-3xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            <span className="bg-gradient-to-r from-zinc-100 via-purple-300 to-pink-300 bg-clip-text bg-[length:200%_auto] text-transparent animate-shimmer">
+            <span className="bg-linear-to-r from-zinc-100 via-purple-300 to-pink-300 bg-clip-text bg-[length:200%_auto] text-transparent animate-shimmer">
               Manage Tasks
             </span>
             <br />
             <span className="text-zinc-400">On The</span>{" "}
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Blockchain
             </span>
           </h1>
@@ -148,7 +148,7 @@ export default function LandingPage() {
 
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-5 sm:pb-24">
           <div className="animate-fade-up relative overflow-hidden border border-zinc-800/50 bg-zinc-950/20 px-5 py-10 text-center backdrop-blur-sm sm:px-8 sm:py-14">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-pink-500/5" />
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-purple-500/5 via-transparent to-pink-500/5" />
             <h2 className="relative text-xl font-bold text-zinc-200 sm:text-2xl md:text-3xl">
               Ready to streamline your workflow?
             </h2>
