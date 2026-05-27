@@ -1,35 +1,59 @@
-"use client"
+"use client";
 
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { GripVertical, Trash2, Calendar, ListChecks, Loader2 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { useStore } from "@/lib/store"
-import { PRIORITY_MAP, type Todo } from "@/lib/types"
-import { useChain } from "@/hooks/useChain"
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  GripVertical,
+  Trash2,
+  Calendar,
+  ListChecks,
+  Loader2,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useStore } from "@/lib/store";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { PRIORITY_MAP, type Todo } from "@/lib/types";
+import { TODO_LIST_ABI, TODO_LIST_ADDRESS } from "@/lib/contract";
 
-const JELLY_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)"
+const JELLY_EASE = "cubic-bezier(0.34, 1.56, 0.64, 1)";
 
 interface Props {
-  todo: Todo
-  isDragOverlay?: boolean
+  todo: Todo;
+  isDragOverlay?: boolean;
 }
 
 export function KanbanCard({ todo, isDragOverlay }: Props) {
-  const { dispatch, isWalletConnected } = useStore()
-  const { deleteTodo, isPending } = useChain()
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const { dispatch, isWalletConnected } = useStore();
+
+  // Per-card delete state — prevents shared isPending across all cards
+  const { writeContract: deleteWrite, data: deleteHash, isPending: isDeletePending } = useWriteContract();
+  const { isLoading: isDeleteConfirming } = useWaitForTransactionReceipt({ hash: deleteHash });
+  const isDeleting = isDeletePending || isDeleteConfirming;
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: todo.id,
     transition: { duration: 400, easing: JELLY_EASE },
-  })
+  });
 
-  const completedSubtasks = todo.subtasks.filter((s) => s.completed).length
+  const completedSubtasks = todo.subtasks.filter((s) => s.completed).length;
 
   function handleDelete() {
-    const id = todo.id
-    dispatch({ type: "DELETE_TODO", payload: id })
+    const id = todo.id;
+    dispatch({ type: "DELETE_TODO", payload: id });
     if (isWalletConnected) {
-      deleteTodo(id, () => {})
+      deleteWrite({
+        address: TODO_LIST_ADDRESS,
+        abi: TODO_LIST_ABI,
+        functionName: "deleteTodo",
+        args: [BigInt(id)],
+      });
     }
   }
 
@@ -53,6 +77,7 @@ export function KanbanCard({ todo, isDragOverlay }: Props) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <button
+            aria-label={`Drag to reorder: ${todo.title}`}
             {...attributes}
             {...listeners}
             className="cursor-grab touch-none text-zinc-700 transition-colors duration-150 hover:text-zinc-400 active:cursor-grabbing"
@@ -65,10 +90,15 @@ export function KanbanCard({ todo, isDragOverlay }: Props) {
         </div>
         <button
           onClick={handleDelete}
-          disabled={isPending}
+          disabled={isDeleting}
+          aria-label={`Delete task: ${todo.title}`}
           className="shrink-0 rounded-[1px] p-0.5 text-zinc-700 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400 disabled:opacity-40 max-sm:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
         >
-          {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+          {isDeleting ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Trash2 className="h-3 w-3" />
+          )}
         </button>
       </div>
 
@@ -93,7 +123,9 @@ export function KanbanCard({ todo, isDragOverlay }: Props) {
       )}
 
       <div className="mt-2.5 flex items-center gap-2 text-[9px] uppercase tracking-wider text-zinc-600">
-        <span className={`border px-1 py-0.5 leading-none ${PRIORITY_MAP[todo.priority]}`}>
+        <span
+          className={`border px-1 py-0.5 leading-none ${PRIORITY_MAP[todo.priority]}`}
+        >
           {todo.priority}
         </span>
         {todo.subtasks.length > 0 && (
@@ -105,10 +137,13 @@ export function KanbanCard({ todo, isDragOverlay }: Props) {
         {todo.dueDate && (
           <span className="flex items-center gap-1">
             <Calendar className="h-2.5 w-2.5" />
-            {new Date(todo.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            {new Date(todo.dueDate).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })}
           </span>
         )}
       </div>
     </div>
-  )
+  );
 }

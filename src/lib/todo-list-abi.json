@@ -1,0 +1,375 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      }
+    ],
+    "name": "TodoCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "TodoDeleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "newColumn",
+        "type": "uint8"
+      }
+    ],
+    "name": "TodoMoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "TodoUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "todoId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      }
+    ],
+    "name": "addSubTask",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "priority",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "column",
+        "type": "uint8"
+      },
+      {
+        "internalType": "string[]",
+        "name": "labels",
+        "type": "string[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "dueDate",
+        "type": "uint256"
+      }
+    ],
+    "name": "createTodo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "deleteTodo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "todoId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getSubtasks",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "completed",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct TodoList.SubTask[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getTodos",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "id",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint8",
+            "name": "priority",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "column",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string[]",
+            "name": "labels",
+            "type": "string[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dueDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "exists",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct TodoList.Todo[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserStats",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "tasksCreated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "tasksDone",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint8",
+            "name": "columnsBitmask",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalLabels",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct TodoList.UserStats",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "newColumn",
+        "type": "uint8"
+      }
+    ],
+    "name": "moveTodo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "todoId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "subId",
+        "type": "uint256"
+      }
+    ],
+    "name": "toggleSubTask",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "priority",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "column",
+        "type": "uint8"
+      },
+      {
+        "internalType": "string[]",
+        "name": "labels",
+        "type": "string[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "dueDate",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateTodo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

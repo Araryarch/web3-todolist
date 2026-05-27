@@ -12,18 +12,29 @@ contract TodoList {
         uint256 id;
         string title;
         string description;
-        uint8 priority; // 0=low, 1=medium, 2=high, 3=urgent
-        uint8 column; // 0=backlog, 1=todo, 2=in-progress, 3=done
+        uint8 priority;
+        uint8 column;
         string[] labels;
         uint256 dueDate;
         uint256 createdAt;
         bool exists;
     }
 
+    struct UserStats {
+        uint256 tasksCreated;
+        uint256 tasksDone;
+        uint8 columnsBitmask;
+        uint256 totalLabels;
+    }
+
     uint256 private _nextId;
     mapping(address => mapping(uint256 => Todo)) private _todos;
     mapping(address => uint256[]) private _userTodoIds;
     mapping(uint256 => SubTask[]) private _todoSubtasks;
+
+    mapping(address => UserStats) private _userStats;
+    mapping(address => mapping(bytes32 => bool)) private _usedLabelHashes;
+    mapping(address => mapping(uint256 => bool)) private _taskDone;
 
     event TodoCreated(uint256 indexed id, address indexed owner, string title);
     event TodoUpdated(uint256 indexed id, address indexed owner);
@@ -51,6 +62,17 @@ contract TodoList {
             exists: true
         });
         _userTodoIds[msg.sender].push(id);
+
+        _userStats[msg.sender].tasksCreated++;
+        _userStats[msg.sender].columnsBitmask |= uint8(1 << column);
+        for (uint256 i = 0; i < labels.length; i++) {
+            bytes32 h = keccak256(abi.encodePacked(labels[i]));
+            if (!_usedLabelHashes[msg.sender][h]) {
+                _usedLabelHashes[msg.sender][h] = true;
+                _userStats[msg.sender].totalLabels++;
+            }
+        }
+
         emit TodoCreated(id, msg.sender, title);
     }
 
@@ -71,6 +93,16 @@ contract TodoList {
         todo.column = column;
         todo.labels = labels;
         todo.dueDate = dueDate;
+
+        _userStats[msg.sender].columnsBitmask |= uint8(1 << column);
+        for (uint256 i = 0; i < labels.length; i++) {
+            bytes32 h = keccak256(abi.encodePacked(labels[i]));
+            if (!_usedLabelHashes[msg.sender][h]) {
+                _usedLabelHashes[msg.sender][h] = true;
+                _userStats[msg.sender].totalLabels++;
+            }
+        }
+
         emit TodoUpdated(id, msg.sender);
     }
 
@@ -92,6 +124,14 @@ contract TodoList {
     function moveTodo(uint256 id, uint8 newColumn) external {
         require(_todos[msg.sender][id].exists, "Todo does not exist");
         _todos[msg.sender][id].column = newColumn;
+
+        _userStats[msg.sender].columnsBitmask |= uint8(1 << newColumn);
+
+        if (newColumn == 3 && !_taskDone[msg.sender][id]) {
+            _taskDone[msg.sender][id] = true;
+            _userStats[msg.sender].tasksDone++;
+        }
+
         emit TodoMoved(id, newColumn);
     }
 
@@ -122,5 +162,9 @@ contract TodoList {
         uint256 todoId
     ) external view returns (SubTask[] memory) {
         return _todoSubtasks[todoId];
+    }
+
+    function getUserStats(address user) external view returns (UserStats memory) {
+        return _userStats[user];
     }
 }

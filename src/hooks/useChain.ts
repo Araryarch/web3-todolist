@@ -54,25 +54,27 @@ export function useChain() {
   const fetchAllTodos = useCallback(async (): Promise<Todo[]> => {
     if (!address || !rawTodos) return []
     const chainTodos = rawTodos as ChainTodo[]
-    const subtaskPromises = chainTodos.map((t) => fetchSubtasksForTodo(Number(t.id)))
+
+    // Filter first, then fetch subtasks — fixes off-by-one when deleted todos exist
+    const existingTodos = chainTodos.filter((t) => t.exists)
+    const subtaskPromises = existingTodos.map((t) => fetchSubtasksForTodo(Number(t.id)))
     const allSubtasks = await Promise.all(subtaskPromises)
-    return chainTodos
-      .filter((t) => t.exists)
-      .map((t, i) => ({
-        id: t.id.toString(),
-        title: t.title,
-        description: t.description || undefined,
-        priority: PRIORITY_MAP_UI[t.priority] as Priority,
-        column: COLUMN_MAP_UI[t.column] as KanbanColumn,
-        subtasks: allSubtasks[i] ?? [],
-        labels: [...t.labels],
-        dueDate: t.dueDate > BigInt(0) ? new Date(Number(t.dueDate) * 1000).toISOString() : undefined,
-        createdAt: new Date(Number(t.createdAt) * 1000).toISOString(),
-      }))
+
+    return existingTodos.map((t, i) => ({
+      id: t.id.toString(),
+      title: t.title,
+      description: t.description || undefined,
+      priority: PRIORITY_MAP_UI[t.priority] as Priority,
+      column: COLUMN_MAP_UI[t.column] as KanbanColumn,
+      subtasks: allSubtasks[i] ?? [],
+      labels: [...t.labels],
+      dueDate: t.dueDate > BigInt(0) ? new Date(Number(t.dueDate) * 1000).toISOString() : undefined,
+      createdAt: new Date(Number(t.createdAt) * 1000).toISOString(),
+    }))
   }, [address, rawTodos, fetchSubtasksForTodo])
 
   const createTodoAction = useCallback(
-    async (todo: Todo, onSuccess?: () => void) => {
+    (todo: Todo, onSuccess?: () => void) => {
       const priority = PRIORITY_MAP_CHAIN[todo.priority] ?? 1
       const col = COLUMN_MAP_CHAIN[todo.column] ?? 1
       const dueDate = todo.dueDate ? BigInt(Math.floor(new Date(todo.dueDate).getTime() / 1000)) : BigInt(0)
@@ -90,7 +92,7 @@ export function useChain() {
   )
 
   const updateTodoAction = useCallback(
-    async (todo: Todo, onSuccess?: () => void) => {
+    (todo: Todo, onSuccess?: () => void) => {
       const priority = PRIORITY_MAP_CHAIN[todo.priority] ?? 1
       const col = COLUMN_MAP_CHAIN[todo.column] ?? 1
       const dueDate = todo.dueDate ? BigInt(Math.floor(new Date(todo.dueDate).getTime() / 1000)) : BigInt(0)
@@ -108,7 +110,7 @@ export function useChain() {
   )
 
   const deleteTodoAction = useCallback(
-    async (id: string, onSuccess?: () => void) => {
+    (id: string, onSuccess?: () => void) => {
       writeContract(
         { address: TODO_LIST_ADDRESS, abi: TODO_LIST_ABI, functionName: "deleteTodo", args: [BigInt(id)] },
         { onSuccess }
@@ -118,7 +120,7 @@ export function useChain() {
   )
 
   const moveTodoAction = useCallback(
-    async (id: string, col: KanbanColumn, onSuccess?: () => void) => {
+    (id: string, col: KanbanColumn, onSuccess?: () => void) => {
       const c = COLUMN_MAP_CHAIN[col] ?? 1
       writeContract(
         { address: TODO_LIST_ADDRESS, abi: TODO_LIST_ABI, functionName: "moveTodo", args: [BigInt(id), c] },

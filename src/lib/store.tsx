@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from "react"
+import { createContext, useContext, useReducer, useEffect, useRef, useCallback, type ReactNode } from "react"
 import { useAccount } from "wagmi"
 import { useChain } from "@/hooks/useChain"
 import type { Todo, KanbanColumn } from "./types"
@@ -45,21 +45,21 @@ function reducer(state: State, action: Action): State {
         ),
       }
     case "REORDER": {
-      const columnTodos = state.todos.filter(
-        (t) => t.column === action.payload.column
-      )
-      const otherTodos = state.todos.filter(
-        (t) => t.column !== action.payload.column
-      )
-      const orderedMap = new Map(
-        action.payload.ids.map((id, i) => [id, i])
-      )
-      columnTodos.sort(
-        (a, b) =>
-          (orderedMap.get(a.id) ?? Infinity) -
-          (orderedMap.get(b.id) ?? Infinity)
-      )
-      return { ...state, todos: [...otherTodos, ...columnTodos] }
+      // Preserve relative position of all column groups — only reorder the target column
+      const reorderedIds = action.payload.ids
+      const idOrderMap = new Map(reorderedIds.map((id, i) => [id, i]))
+
+      return {
+        ...state,
+        todos: state.todos.map((t) => t).sort((a, b) => {
+          // If both are in the reordered column, sort by the new order
+          if (a.column === action.payload.column && b.column === action.payload.column) {
+            return (idOrderMap.get(a.id) ?? Infinity) - (idOrderMap.get(b.id) ?? Infinity)
+          }
+          // Otherwise preserve original relative order
+          return state.todos.indexOf(a) - state.todos.indexOf(b)
+        }),
+      }
     }
     case "SET_TODOS":
       return { ...state, todos: action.payload }
@@ -88,6 +88,16 @@ function StoreInner({ children }: { children: ReactNode }) {
   const { isPending, isConfirming, isSuccess, hash, refetchTodos, fetchAllTodos } = useChain()
   const prevHashRef = useRef<string | null>(null)
 
+  const syncTodos = useCallback(async () => {
+    try {
+      await refetchTodos()
+      const todos = await fetchAllTodos()
+      dispatch({ type: "SET_TODOS", payload: todos })
+    } catch (err) {
+      console.error("Failed to sync todos from chain:", err)
+    }
+  }, [refetchTodos, fetchAllTodos])
+
   useEffect(() => {
     if (!isConnected) {
       dispatch({ type: "SET_TODOS", payload: [] })
@@ -105,13 +115,9 @@ function StoreInner({ children }: { children: ReactNode }) {
     } else if (isSuccess && h) {
       prevHashRef.current = null
       dispatch({ type: "SET_PENDING_TX", payload: null })
-      refetchTodos().then(() => {
-        fetchAllTodos().then((todos) => {
-          dispatch({ type: "SET_TODOS", payload: todos })
-        })
-      })
+      syncTodos()
     }
-  }, [isConnected, address, isPending, isConfirming, isSuccess, hash, refetchTodos, fetchAllTodos])
+  }, [isConnected, address, isPending, isConfirming, isSuccess, hash, syncTodos])
 
   return (
     <StoreContext.Provider value={{ state, dispatch, isWalletConnected: isConnected, pendingTx: state.pendingTx }}>

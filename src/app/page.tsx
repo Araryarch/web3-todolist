@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ListTodo, GitBranch, Wallet, GanttChart, ArrowRight, CheckCircle2, Sparkles } from "lucide-react"
+import { GitBranch, Wallet, GanttChart, ArrowRight, CheckCircle2, Sparkles } from "lucide-react"
 
 const features = [
   {
