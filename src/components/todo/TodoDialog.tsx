@@ -108,7 +108,7 @@ export function TodoDialog({ editTodo }: Props) {
   function handleSubmit() {
     if (!title.trim()) return;
     const todo: Todo = {
-      id: editTodo?.id ?? crypto.randomUUID(),
+      id: editTodo?.id ?? String(Date.now()) + Math.floor(Math.random() * 10000),
       title: title.trim(),
       description: description.trim() || undefined,
       priority,

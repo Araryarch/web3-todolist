@@ -93,6 +93,8 @@ export function useChain() {
 
   const updateTodoAction = useCallback(
     (todo: Todo, onSuccess?: () => void) => {
+      const bid = toId(todo.id)
+      if (bid < BigInt(0)) return
       const priority = PRIORITY_MAP_CHAIN[todo.priority] ?? 1
       const col = COLUMN_MAP_CHAIN[todo.column] ?? 1
       const dueDate = todo.dueDate ? BigInt(Math.floor(new Date(todo.dueDate).getTime() / 1000)) : BigInt(0)
@@ -101,7 +103,7 @@ export function useChain() {
           address: TODO_LIST_ADDRESS,
           abi: TODO_LIST_ABI,
           functionName: "updateTodo",
-          args: [BigInt(todo.id), todo.title, todo.description ?? "", priority, col, todo.labels, dueDate],
+          args: [bid, todo.title, todo.description ?? "", priority, col, todo.labels, dueDate],
         },
         { onSuccess }
       )
@@ -109,10 +111,16 @@ export function useChain() {
     [writeContract]
   )
 
+  function toId(id: string): bigint {
+    try { return BigInt(id) } catch { return BigInt(-1) }
+  }
+
   const deleteTodoAction = useCallback(
     (id: string, onSuccess?: () => void) => {
+      const bid = toId(id)
+      if (bid < BigInt(0)) return
       writeContract(
-        { address: TODO_LIST_ADDRESS, abi: TODO_LIST_ABI, functionName: "deleteTodo", args: [BigInt(id)] },
+        { address: TODO_LIST_ADDRESS, abi: TODO_LIST_ABI, functionName: "deleteTodo", args: [bid] },
         { onSuccess }
       )
     },
@@ -121,9 +129,11 @@ export function useChain() {
 
   const moveTodoAction = useCallback(
     (id: string, col: KanbanColumn, onSuccess?: () => void) => {
+      const bid = toId(id)
+      if (bid < BigInt(0)) return
       const c = COLUMN_MAP_CHAIN[col] ?? 1
       writeContract(
-        { address: TODO_LIST_ADDRESS, abi: TODO_LIST_ABI, functionName: "moveTodo", args: [BigInt(id), c] },
+        { address: TODO_LIST_ADDRESS, abi: TODO_LIST_ABI, functionName: "moveTodo", args: [bid, c] },
         { onSuccess }
       )
     },

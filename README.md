@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MyTodoList
 
-## Getting Started
+Task kanban on-chain — todos disimpan di smart contract, bukan database.
 
-First, run the development server:
+Built with: Next.js 16, Bun, Tailwind v4, Hardhat v3, Solidity 0.8.28, wagmi v3.
+
+---
+
+## Prerequisites
+
+- [Bun](https://bun.sh) v1.3.2
+- [MetaMask](https://metamask.io) atau wallet Web3 lain (Rabby, dll)
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Jalanin (3 terminal)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Terminal 1 — Local blockchain
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+bunx hardhat node
+```
 
-## Learn More
+Ini jalanin Hardhat network di `http://127.0.0.1:8545`. Biarin aja jalan.
 
-To learn more about Next.js, take a look at the following resources:
+### Terminal 2 — Deploy contracts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+bunx hardhat run scripts/deploy.ts --network localhost
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Nge-deploy `TodoList.sol` dan `TodoNFT.sol`, trus nulis address-nya ke `.env.local`.
 
-## Deploy on Vercel
+### Terminal 3 — Web app
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+bun run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Buka `http://localhost:3000`.
+
+## MetaMask setup
+
+1. Buka MetaMask → Settings → Networks → Add Network Manual
+2. **Network Name:** `Hardhat Local`
+3. **RPC URL:** `http://127.0.0.1:8545`
+4. **Chain ID:** `31337`
+5. **Currency Symbol:** `ETH`
+
+Import salah satu account Hardhat (saldo 10.000 ETH):
+
+```
+0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+```
+
+## Cara pake
+
+1. Buka `http://localhost:3000`
+2. Klik **Connect Wallet** — pake MetaMask
+3. Setelah connect, klik **New Task** buat bikin todo
+4. Drag card ke kolom lain buat mindahin status
+5. Semua perubahan tersimpan di smart contract
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `bun run dev` | Next.js dev server (Turbopack) |
+| `bun run build` | Build production |
+| `bun run lint` | ESLint check |
+| `bunx hardhat node` | Local blockchain |
+| `bunx hardhat run scripts/deploy.ts --network localhost` | Deploy contracts |
+| `bunx hardhat run scripts/deploy.ts --network sepolia` | Deploy ke Sepolia testnet |
+
+## Struktur
+
+```
+src/
+  app/              Routes (landing, board)
+  components/       UI komponen
+  hooks/            useChain, useBadges
+  lib/              Types, store, wagmi config, ABI, badges
+contracts/          Smart contracts (TodoList.sol, TodoNFT.sol)
+scripts/            Hardhat deploy script
+```
+
+## Smart contracts
+
+- **TodoList.sol** — CRUD todos, subtasks, column moves, user stats
+- **TodoNFT.sol** — ERC-1155 achievement badges (8 jenis, claimable on-chain)
