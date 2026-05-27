@@ -1,0 +1,47 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-6ae1121d178f70d39b9ad165d7f6174631a1a71f",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "userSourceNameMap": {
+    "contracts/TodoList.sol": "project/contracts/TodoList.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "project/contracts/TodoList.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract TodoList {\n    struct SubTask {\n        uint256 id;\n        string title;\n        bool completed;\n    }\n\n    struct Todo {\n        uint256 id;\n        string title;\n        string description;\n        uint8 priority; // 0=low, 1=medium, 2=high, 3=urgent\n        uint8 column; // 0=backlog, 1=todo, 2=in-progress, 3=done\n        string[] labels;\n        uint256 dueDate;\n        uint256 createdAt;\n        bool exists;\n    }\n\n    uint256 private _nextId;\n    mapping(address => mapping(uint256 => Todo)) private _todos;\n    mapping(address => uint256[]) private _userTodoIds;\n    mapping(uint256 => SubTask[]) private _todoSubtasks;\n\n    event TodoCreated(uint256 indexed id, address indexed owner, string title);\n    event TodoUpdated(uint256 indexed id, address indexed owner);\n    event TodoDeleted(uint256 indexed id, address indexed owner);\n    event TodoMoved(uint256 indexed id, uint8 newColumn);\n\n    function createTodo(\n        string calldata title,\n        string calldata description,\n        uint8 priority,\n        uint8 column,\n        string[] calldata labels,\n        uint256 dueDate\n    ) external {\n        uint256 id = _nextId++;\n        _todos[msg.sender][id] = Todo({\n            id: id,\n            title: title,\n            description: description,\n            priority: priority,\n            column: column,\n            labels: labels,\n            dueDate: dueDate,\n            createdAt: block.timestamp,\n            exists: true\n        });\n        _userTodoIds[msg.sender].push(id);\n        emit TodoCreated(id, msg.sender, title);\n    }\n\n    function updateTodo(\n        uint256 id,\n        string calldata title,\n        string calldata description,\n        uint8 priority,\n        uint8 column,\n        string[] calldata labels,\n        uint256 dueDate\n    ) external {\n        require(_todos[msg.sender][id].exists, \"Todo does not exist\");\n        Todo storage todo = _todos[msg.sender][id];\n        todo.title = title;\n        todo.description = description;\n        todo.priority = priority;\n        todo.column = column;\n        todo.labels = labels;\n        todo.dueDate = dueDate;\n        emit TodoUpdated(id, msg.sender);\n    }\n\n    function deleteTodo(uint256 id) external {\n        require(_todos[msg.sender][id].exists, \"Todo does not exist\");\n        delete _todos[msg.sender][id];\n        address owner = msg.sender;\n        uint256[] storage ids = _userTodoIds[owner];\n        for (uint256 i = 0; i < ids.length; i++) {\n            if (ids[i] == id) {\n                ids[i] = ids[ids.length - 1];\n                ids.pop();\n                break;\n            }\n        }\n        emit TodoDeleted(id, owner);\n    }\n\n    function moveTodo(uint256 id, uint8 newColumn) external {\n        require(_todos[msg.sender][id].exists, \"Todo does not exist\");\n        _todos[msg.sender][id].column = newColumn;\n        emit TodoMoved(id, newColumn);\n    }\n\n    function getTodos(address user) external view returns (Todo[] memory) {\n        uint256[] storage ids = _userTodoIds[user];\n        uint256 count = ids.length;\n        Todo[] memory result = new Todo[](count);\n        for (uint256 i = 0; i < count; i++) {\n            result[i] = _todos[user][ids[i]];\n        }\n        return result;\n    }\n\n    function addSubTask(uint256 todoId, string calldata title) external {\n        require(_todos[msg.sender][todoId].exists, \"Todo does not exist\");\n        uint256 subId = _todoSubtasks[todoId].length;\n        _todoSubtasks[todoId].push(SubTask(subId, title, false));\n    }\n\n    function toggleSubTask(uint256 todoId, uint256 subId) external {\n        require(_todos[msg.sender][todoId].exists, \"Todo does not exist\");\n        require(subId < _todoSubtasks[todoId].length, \"Subtask not found\");\n        _todoSubtasks[todoId][subId].completed =\n            !_todoSubtasks[todoId][subId].completed;\n    }\n\n    function getSubtasks(\n        uint256 todoId\n    ) external view returns (SubTask[] memory) {\n        return _todoSubtasks[todoId];\n    }\n}\n"
+      }
+    }
+  }
+}
